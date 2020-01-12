@@ -18,6 +18,17 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Ingredient.cpp" />
+    <ClCompile Include="Source\InstantPot.cpp" />
+    <ClCompile Include="Source\Recipe.cpp" />
+    <ClCompile Include="Source\RecipeScraper.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Ingredient.h" />
+    <ClInclude Include="Source\Recipe.h" />
+    <ClInclude Include="Source\RecipeScraper.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{B713DCD8-7E42-489F-A9B9-EEB5D539CC4E}</ProjectGuid>
@@ -43,7 +54,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -108,10 +119,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -152,15 +165,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Ingredient.cpp" />
-    <ClCompile Include="InstantPot.cpp" />
-    <ClCompile Include="Recipe.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Ingredient.h" />
-    <ClInclude Include="Recipe.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

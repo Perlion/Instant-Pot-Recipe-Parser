@@ -15,21 +15,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="InstantPot.cpp">
+    <ClCompile Include="Source\Ingredient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ingredient.cpp">
+    <ClCompile Include="Source\InstantPot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Recipe.cpp">
+    <ClCompile Include="Source\Recipe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RecipeScraper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Recipe.h">
+    <ClInclude Include="Source\Ingredient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Ingredient.h">
+    <ClInclude Include="Source\Recipe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RecipeScraper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
