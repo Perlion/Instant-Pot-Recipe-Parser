@@ -16,8 +16,8 @@ vector<string> RecipeScraper::getRecipesFromSite(ifstream& fin)
 		int recipeURLIndex = line.find("https://recipes.instantpot.com/recipe");
 		if (recipeURLIndex != string::npos)
 		{
-			int URLEndPoint = line.find(">", recipeURLIndex);
-			string siteToDownload = line.substr(recipeURLIndex, URLEndPoint - 22);
+			int URLEndPoint = line.find("\">", recipeURLIndex);
+			string siteToDownload = line.substr(recipeURLIndex, URLEndPoint - recipeURLIndex);
 			recipes.push_back(siteToDownload);
 		}
 	}
@@ -29,56 +29,112 @@ string RecipeScraper::downloadSite(string webAddress, string fileName)
 	HRESULT hr = URLDownloadToFile(NULL, webAddress.c_str(), fileName.c_str(), 0, NULL);
 	if (hr == S_OK)
 	{
-		cout << endl << "Downloaded: " << webAddress << " with file name: " << fileName << endl;
+		//cout << endl << "Downloaded: " << webAddress << " with file name: " << fileName << endl;
 		return fileName;
 	}
 	else
 	{
-		cout << "Operation failed with error code: " << hr << " on site " << webAddress << " with file name " << fileName << "\n";
+		//cout << "Operation failed with error code: " << hr << " on site " << webAddress << " with file name " << fileName << "\n";
 		return "";
 	}
 }
 
-void RecipeScraper::downloadRecipes()
+void RecipeScraper::downloadRecipes()	
 {
 	string webAddress = "https://recipes.instantpot.com/?coursefilter=&cuisinefilter=&dietfilter=&search=&bsearch=Search&index=";
+	string path = "Recipes/";
 
-	for (int i = 1; i < 2; i++)
+	for (int i = 1; i < 39; i++)//38 pages
 	{
-		//string downloadedSite = downloadSite(webAddress + char(i + '0'), string("Page.html"));
-		//ifstream fin(downloadedSite);
-		//vector<string> recipeURLS = getRecipesFromSite(fin);
-
-		//string recipeSite = downloadSite(recipeURLS[0], "recipe.html");
-		string recipeSite = "recipe.html";
-		ifstream finRecipe(recipeSite);
-		string line;
-		vector<Ingredient> IngredientsInRecipe;
-		while (getline(finRecipe, line))
+		string indexDownloadName = "C:/Users/UE4Jam/Documents/GitHub/Instant-Pot-Recipe-Parser/InstantPot/InstantPot/Sites/Indexs/Index";
+		indexDownloadName += to_string(i);
+		indexDownloadName += ".html";
+		string searchAddress = webAddress + to_string(i);
+		string downloadedSite = downloadSite(searchAddress, indexDownloadName);
+		
+		ifstream fin(downloadedSite);
+		vector<string> recipeURLS = getRecipesFromSite(fin);
+		
+		
+		for (int j = 0; j < recipeURLS.size(); j++) // Individual Recipe Download
 		{
-			if (line.find("<div class=\"wpurp-responsive-desktop\">") != string::npos) //avoid reading recipe twice
-				break;
-			int ingredientClassStartIndex = line.find("<li class=\"wpurp-recipe-ingredient\"");
-			do {
-				int ingredientClassEndIndex = line.find("</li>", ingredientClassStartIndex);
-				ingredientClassEndIndex += 5;
-				if (ingredientClassStartIndex != string::npos && ingredientClassEndIndex != string::npos)
-				{
-					string ingredientClass = line.substr(ingredientClassStartIndex, ingredientClassEndIndex - ingredientClassStartIndex);
-					IngredientsInRecipe.push_back(ExtractSpanTagsIntoIngredient(ingredientClass));
-				}
-				ingredientClassStartIndex = line.find("<li class=\"wpurp-recipe-ingredient\"", ingredientClassEndIndex);
-			} while (ingredientClassStartIndex != string::npos); // Go through all ingredients
+			cout << "Downloading page: " << i << " with recipe URL: " << recipeURLS[j] << endl;
+			string siteDownloadName = "C:/Users/UE4Jam/Documents/GitHub/Instant-Pot-Recipe-Parser/InstantPot/InstantPot/Sites/Recipies/recipe";
+			siteDownloadName += to_string(i);
+			siteDownloadName += to_string(j);
+			siteDownloadName += ".html";
+			string recipeSite = downloadSite(recipeURLS[j], siteDownloadName);
+			Recipe recipeToAdd = ExtractRecipeFromSite(recipeSite);
+			recipeToAdd.setRecipeURL(recipeURLS[j]);
+			recipeToAdd.Serialize();
+			//std::this_thread::sleep_for(std::chrono::milliseconds(50));
 		}
-		cout << left << setw(50) << "Amount" << left << setw(50) << "Type" << left << setw(50) << "Name" << endl;
-		for (auto a : IngredientsInRecipe)
-		{
-			cout << left << setw(50) << a.getMeasurement();
-			cout << left << setw(50) << a.getMeasurementType();
-			cout << left << setw(50) << a.getName() << endl;
-		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Delay as to not send 1100 requests to their server over a span of 5 minutes
 	}
+}
+
+Recipe RecipeScraper::ExtractRecipeFromSite(std::string& recipeSite)
+{
+	ifstream finRecipe(recipeSite);
+	string line;
+	vector<Ingredient> IngredientsInRecipe;
+	Recipe recipeToConstruct;
+	while (getline(finRecipe, line))
+	{
+		if (line.find("<div class=\"wpurp-responsive-desktop\">") != string::npos) //avoid reading recipe twice
+			break;
+		if (recipeToConstruct.getName().empty())
+		{
+			recipeToConstruct.setName(ExtractSpanTag(line, "<span class=\"wpurp-recipe-title"));
+		}
+		if (recipeToConstruct.getCookTime().empty())
+		{
+			recipeToConstruct.setCookTime(ExtractSpanTag(line, "<span class=\"wpurp-recipe-cook-time"));
+		}
+		ExtractIngredients(line, IngredientsInRecipe); // Go through all ingredients
+	}
+	for (auto a : IngredientsInRecipe)
+	{
+		recipeToConstruct.addIngredient(a);
+	}
+	return recipeToConstruct;
+}
+
+string RecipeScraper::ExtractSpanTag(std::string& line, std::string spanOpener)
+{
+	int recipeTitleStartIndex = line.find(spanOpener);
+	if (recipeTitleStartIndex != string::npos)
+	{
+		int recipeTitleEndIndex = line.find("</span>");
+		recipeTitleEndIndex += 7;
+		smatch name;
+		regex units("^<.*!important;\">(.*)?<.*>$");
+		string nameSpan = line.substr(recipeTitleStartIndex, recipeTitleEndIndex - recipeTitleStartIndex);
+		if (regex_match(nameSpan, name, units))
+		{
+			return name[1];
+		}
+		else
+		{
+			cout << "No Match For Name: " << nameSpan << endl;
+		}
+	}
+	return "";
+}
+
+void RecipeScraper::ExtractIngredients(std::string& line, std::vector<Ingredient>& IngredientsInRecipe)
+{
+	int ingredientClassStartIndex = line.find("<li class=\"wpurp-recipe-ingredient\"");
+	do {
+		int ingredientClassEndIndex = line.find("</li>", ingredientClassStartIndex);
+		ingredientClassEndIndex += 5;
+		if (ingredientClassStartIndex != string::npos && ingredientClassEndIndex != string::npos)
+		{
+			string ingredientClass = line.substr(ingredientClassStartIndex, ingredientClassEndIndex - ingredientClassStartIndex);
+			IngredientsInRecipe.push_back(ExtractSpanTagsIntoIngredient(ingredientClass));
+		}
+		ingredientClassStartIndex = line.find("<li class=\"wpurp-recipe-ingredient\"", ingredientClassEndIndex);
+	} while (ingredientClassStartIndex != string::npos);
 }
 
 Ingredient RecipeScraper::ExtractSpanTagsIntoIngredient(std::string& ingredientClass)
@@ -103,7 +159,15 @@ Ingredient RecipeScraper::ExtractSpanTagsIntoIngredient(std::string& ingredientC
 			}
 			else
 			{
-				cout << "No Match" << endl;
+				regex noDigits("^<.*!important;\">(.*)?<.*>$");
+				if (regex_match(spanString, amount, noDigits))
+				{
+					ingredientToConstruct.setMeasurement(amount[1]);
+				}
+				else
+				{
+					cout << "No Match For Measurement: " << spanString << endl;
+				}
 			}
 		}
 		else if (index == 1)
@@ -115,7 +179,7 @@ Ingredient RecipeScraper::ExtractSpanTagsIntoIngredient(std::string& ingredientC
 			}
 			else
 			{
-				cout << spanString << endl;
+				cout << "No Match For Unit: " << spanString << endl;
 			}
 		}
 		else if (index == 2)
@@ -132,51 +196,11 @@ Ingredient RecipeScraper::ExtractSpanTagsIntoIngredient(std::string& ingredientC
 			}
 			else
 			{
-				cout << spanString << endl;
+				cout << "No Match For Ingredient: " << spanString << endl;
 			}
 		}
 		ingredientClassSpanStart = ingredientClass.find("<span", ingredientClassSpanEnd);
 		index++;
 	} while (ingredientClassSpanStart != string::npos); // Go through all <span> tags
 	return ingredientToConstruct;
-}
-
-void RecipeScraper::iterateThruRecipes()
-{
-
-	vector<string> allAvaliableIngredients;
-	vector<Recipe> allCompatibleRecipes;
-	string line;
-	cout << "Please enter your ingredients: \n";
-	while (getline(cin, line))
-	{
-		allAvaliableIngredients.push_back(line);
-	}
-	string path = "Recipes/";
-	for (const auto& entry : fs::directory_iterator(path))
-	{
-		string recipeName = entry.path().string();
-		Recipe recipe;
-		recipe.parseRecipe(recipeName);
-
-
-		int numberOfSimiliarIngredients = 0;
-		for (auto a : recipe.getAllIngredients())
-		{
-			for (auto b : allAvaliableIngredients)
-			{
-				if (a.getIngredientName().find(b) != string::npos)
-				{
-					++numberOfSimiliarIngredients;
-				}
-			}
-		}
-		recipe.setNumberOfSimiliarIngredients(numberOfSimiliarIngredients);
-		allCompatibleRecipes.push_back(recipe);
-	}
-	for (int i = 0; i < allCompatibleRecipes.size(); i++)
-	{
-		cout << i + 1 << ". For " << allCompatibleRecipes[i].getRecipeName() << " you have ";
-		cout << allCompatibleRecipes[i].getNumberOfSimiliarIngredients() << " / " << allCompatibleRecipes[i].getAllIngredients().size() << " Ingredients. \n";
-	}
 }

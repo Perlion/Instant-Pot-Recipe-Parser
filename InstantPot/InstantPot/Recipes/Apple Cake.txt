@@ -1,0 +1,13 @@
+#NAME#
+Apple Cake
+#INGREDIENTS#
+1 red apple sliced very thin
+1 red apple peeled and cut into <uc> 1/2 inch <uc> dice
+7 ounces white cake mix
+1 tsp cinnamon
+0.5 tsp nutmeg
+2 tbsp  cinnamon sugar
+#LINK#
+https://recipes.instantpot.com/recipe/apple-cake/
+#TIME#
+45

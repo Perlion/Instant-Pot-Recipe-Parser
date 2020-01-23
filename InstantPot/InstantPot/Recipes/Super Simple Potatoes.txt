@@ -1,0 +1,9 @@
+#NAME#
+Super Simple Potatoes
+#INGREDIENTS#
+1 lb potatoes
+1 cup Water
+#LINK#
+https://recipes.instantpot.com/recipe/super-simple-instant-pot-potatoes/
+#TIME#
+15

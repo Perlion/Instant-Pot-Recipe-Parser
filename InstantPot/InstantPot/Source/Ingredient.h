@@ -30,10 +30,11 @@ private:
 	bool noAmountFound = false;
 	string errorString;
 	float amount;
+private:
 	string measuremeantType;
 	string ingredientName;
+	string measurementAmountString;
 private:
 	EMeasurementType measurement;
-	string measurementAmountString;
 	string parseError;
 };

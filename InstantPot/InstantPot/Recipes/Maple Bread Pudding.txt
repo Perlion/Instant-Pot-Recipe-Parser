@@ -1,0 +1,15 @@
+#NAME#
+Maple Bread Pudding
+#INGREDIENTS#
+4 slices bread (any kind) torn into <uc>1 inch</uc> pieces
+2 eggs 1.25 cup milk
+0.25 cup brown sugar
+0.33333333333333 cup maple syrup
+0.125 tsp salt
+0.125 tsp nutmeg
+0.5 tsp Vanilla
+0.5 cup nuts
+#LINK#
+https://recipes.instantpot.com/recipe/maple-bread-pudding/
+#TIME#
+40

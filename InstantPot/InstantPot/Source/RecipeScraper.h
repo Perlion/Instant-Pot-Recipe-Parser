@@ -17,8 +17,11 @@ public:
 private:
 	vector<string> getRecipesFromSite(ifstream& fin);
 	string downloadSite(string webAddress, string fileName);
-	void iterateThruRecipes();
 	void downloadRecipes();
+	Recipe ExtractRecipeFromSite(std::string& recipeSite);
+	string ExtractSpanTag(std::string& line, std::string spanOpener);
+	void ExtractIngredients(std::string& line, std::vector<Ingredient>& IngredientsInRecipe);
 	Ingredient ExtractSpanTagsIntoIngredient(std::string& ingredientClass);
+
 };
 
