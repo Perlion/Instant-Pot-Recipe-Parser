@@ -1,10 +1,11 @@
 #include "Recipe.h"
 #include <regex>
 #include <iomanip>
-void Recipe::parseRecipe(string recipeName)
+
+
+void Recipe::parseRecipe(fs::path entry)
 {
-	ifstream recipeFile;
-	recipeFile.open(recipeName);
+	ifstream recipeFile(entry.string());
 	if (recipeFile)
 	{
 		string line;
@@ -61,9 +62,8 @@ void Recipe::Serialize()
 	outFile << cookTime << endl;
 }
 
-Ingredient Recipe::getIngredientFromLine(string line)
+void Recipe::getIngredientFromLine(const string& line, Ingredient& ingredient)
 {
-	Ingredient ingredient;
 	int firstSpaceIndex = line.find(' ');
 	int secondSpaceIndex = line.find(' ', firstSpaceIndex+1);
 	if (firstSpaceIndex != string::npos)
@@ -72,10 +72,10 @@ Ingredient Recipe::getIngredientFromLine(string line)
 		ingredient.setMeasurementType(line.substr(firstSpaceIndex + 1, (secondSpaceIndex - firstSpaceIndex) - 1));
 		ingredient.setIngredientName(line.substr(secondSpaceIndex + 1));
 	}
-	return ingredient;
+	return;
 }
 
-ParseState Recipe::getSection(string line)
+ParseState Recipe::getSection(string_view line)
 {
 	if (line == "#NAME#")
 	{
@@ -103,7 +103,7 @@ ParseState Recipe::getSection(string line)
 	}
 }
 
-void Recipe::parseLine(string line, ParseState currentSection)
+void Recipe::parseLine(const string& line, ParseState& currentSection)
 {
 	if (line.empty())
 		return;
@@ -113,8 +113,13 @@ void Recipe::parseLine(string line, ParseState currentSection)
 		name = line;
 		break;
 	case E_INGREDIENTS:
-		Ingredients.push_back(getIngredientFromLine(line));
+	{
+		Ingredient ing;
+		getIngredientFromLine(line, ing);
+		Ingredients.push_back(ing);
+		++numberOfIngredients;
 		break;
+	}
 	case E_INSTRUCTIONS:
 		Instructions.push_back(line);
 		break;

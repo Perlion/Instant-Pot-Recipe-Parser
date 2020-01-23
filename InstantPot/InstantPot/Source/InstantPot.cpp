@@ -13,8 +13,6 @@ void* operator new(size_t size)
 	return malloc(size);
 }
 
-
-
 vector<Recipe> bubbleSort(vector<Recipe> unsortedRecipies)
 {
 	bool unsorted = true;
@@ -47,14 +45,12 @@ int main()
 	vector<Recipe> AlphabeticallySortedRecipies;
 	AlphabeticallySortedRecipies = GetAllRecipesInFileSystem();
 	
-	//vector<Recipe> sortedByIngredients = bubbleSort(AlphabeticallySortedRecipies);
-	
 	sort(AlphabeticallySortedRecipies.begin(), AlphabeticallySortedRecipies.end(), [](Recipe &a, Recipe &b)
 	{
-			return a.getAllIngredients().size() > b.getAllIngredients().size();
+		return a.numberOfIngredients > b.numberOfIngredients;
 	});
 
-	for (auto a : AlphabeticallySortedRecipies)
+	for (auto& a : AlphabeticallySortedRecipies)
 	{
 		cout << a.getName() << " has: " << a.getAllIngredients().size() << " ingredients." << endl;
 	}
@@ -68,12 +64,13 @@ int main()
 vector<Recipe> GetAllRecipesInFileSystem()
 {
 	vector<Recipe> AllRecipies;
+	AllRecipies.reserve(1000);
 	string path = "Recipes/";
+	
 	for (const auto& entry : fs::directory_iterator(path))
 	{
-		string recipeName = entry.path().string();
 		Recipe recipe;
-		recipe.parseRecipe(recipeName);
+		recipe.parseRecipe(entry);
 		AllRecipies.push_back(recipe);
 	}
 	return AllRecipies;

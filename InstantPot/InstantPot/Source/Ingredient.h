@@ -13,9 +13,9 @@ enum EMeasurementType
 class Ingredient
 {
 public:
-	void setMeasurement(string measurementInput) { measurementAmountString = measurementInput; }
-	void setIngredientName(string ingreName) { ingredientName = ingreName; }
-	void setMeasurementType(string measurementTypeInput) { measuremeantType = measurementTypeInput; }
+	void setMeasurement(const string& measurementInput) { measurementAmountString = measurementInput; }
+	void setIngredientName(const string& ingreName) { ingredientName = ingreName; }
+	void setMeasurementType(const string& measurementTypeInput) { measuremeantType = measurementTypeInput; }
 	string getName() { return ingredientName; }
 	string getMeasurementType() { return measuremeantType; }
 	string getMeasurement() { return measurementAmountString; }
